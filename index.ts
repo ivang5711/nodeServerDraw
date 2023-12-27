@@ -3,6 +3,7 @@ const http = require('http')
 const app = express()
 const server = http.createServer(app)
 
+import { stat } from 'fs'
 import { Server } from 'socket.io'
 const io = new Server(server, {
   cors: {
@@ -10,7 +11,9 @@ const io = new Server(server, {
   },
 })
 
-let roomsAmount = 0;
+let roomsAmount = 6;
+
+let imageSaved: any;
 
 type Point = { x: number; y: number }
 
@@ -27,7 +30,9 @@ io.on('connection', (socket) => {
 
   socket.on('canvas-state', (state) => {
     console.log('received canvas state')
-    socket.broadcast.emit('canvas-state-from-server', state)
+    imageSaved = state;
+    socket.broadcast.emit('canvas-state-from-server', imageSaved)
+    socket.emit('canvas-state-from-server', imageSaved)
   })
 
   socket.on('draw-line', ({ prevPoint, currentPoint, color }: DrawLine) => {
